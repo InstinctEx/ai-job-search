@@ -41,6 +41,12 @@ per-file diff commands.
 
 ### Fixed
 
+- **`/rank` no longer moves the full job history through model context** (#395) -
+  `tools/rank_state.py` projects only the selected jobs, performs the deadline
+  sweep, and applies scoring results with atomic state-file replacement. The
+  helper preserves the complete Step 4 write contract and never modifies the
+  application tracker.
+
 - **`/rank` now bounds each scoring batch** (#395) - a bare run scores at most 10
   eligible jobs instead of attempting the entire backlog. `--limit <N>` controls
   scoring independently of `--top`, and the report makes deferred work visible so

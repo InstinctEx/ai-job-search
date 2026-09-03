@@ -517,5 +517,36 @@ class RankBatchLimitSpec(unittest.TestCase):
         self.assertIn("re-run `/rank` to continue", report)
 
 
+class RankStateHelperSpec(unittest.TestCase):
+    """The growing state file stays outside model context in both directions."""
+
+    def setUp(self):
+        self.sections = _sections(COMMAND.read_text(encoding="utf-8"))
+
+    def test_step1_queries_a_compact_projection(self):
+        step1 = self.sections.get("Step 1: Load State", "")
+        self.assertIn("Never read `job_scraper/seen_jobs.json` into the conversation", step1)
+        self.assertIn("tools/rank_state.py candidates", step1)
+        for field in ("`key`", "`title`", "`company`", "`url`"):
+            self.assertIn(field, step1)
+
+    def test_step3_sweeps_state_through_the_helper(self):
+        step3 = self.sections.get("Step 3: Aggregate and Rank", "")
+        self.assertIn("tools/rank_state.py sweep --write", step3)
+        self.assertIn("atomically expires past deadlines", step3)
+
+    def test_step4_applies_results_without_reemitting_state(self):
+        step4 = self.sections.get("Step 4: Update State", "")
+        self.assertIn("tools/rank_state.py apply", step4)
+        self.assertIn("writes atomically", step4)
+        self.assertIn("leaves the state untouched", step4)
+        self.assertIn("Do not re-read `seen_jobs.json` to build the report", step4)
+
+    def test_important_rule_keeps_tracker_read_only(self):
+        rules = self.sections.get("Important Rules", "")
+        self.assertIn("atomically updated only through `tools/rank_state.py`", rules)
+        self.assertIn("tracker is read-only", rules)
+
+
 if __name__ == "__main__":
     unittest.main()
