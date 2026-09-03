@@ -41,6 +41,11 @@ per-file diff commands.
 
 ### Fixed
 
+- **`/rank` now bounds each scoring batch** (#395) - a bare run scores at most 10
+  eligible jobs instead of attempting the entire backlog. `--limit <N>` controls
+  scoring independently of `--top`, and the report makes deferred work visible so
+  re-running `/rank` can continue it.
+
 - **`convert_salary_excel.py` no longer mistakes a title/citation row for the header row**
   (#414) - header-row detection accepted the first row in the first 10 where *any* cell merely
   contained a company-pattern word, with no check that the row actually looked like a header. A
