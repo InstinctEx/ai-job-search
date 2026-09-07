@@ -13,6 +13,21 @@ per-file diff commands.
 
 ## [Unreleased]
 
+### Fixed
+
+- **`09-web-research.md`'s curl snippets no longer write into the repo when `$SCRATCHPAD`
+  is unset** - both runnable blocks in the 403-escalation path start with `cd "$SCRATCHPAD"`,
+  and nothing in the repository ever sets that variable (`git grep 'SCRATCHPAD='` returns
+  nothing). Unset, it expands to `cd ""`, which succeeds and leaves the shell where it
+  started, so the `&&` chain proceeds and `curl -o page.html` writes to the working
+  directory - in practice the checkout, which is exactly what the paragraph directly beneath
+  the curl block forbids ("Write to the session scratchpad directory, never into the repo").
+  The file's instruction and its own snippet disagreed, and the snippet won silently.
+  Both expansions are now guarded with `${SCRATCHPAD:?...}`, turning a silent repo write into
+  an immediate failure whose message names where the value comes from. Behaviour is unchanged
+  wherever the variable is set. The same undefined reference in `.claude/commands/rank.md`
+  was removed by #425 as a side effect of rewriting Step 2/4; this is the remaining instance.
+
 ## [1.7.1] - 2026-09-06
 
 ### Added
