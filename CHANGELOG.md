@@ -13,6 +13,26 @@ per-file diff commands.
 
 ## [Unreleased]
 
+### Fixed
+
+- **`seen_jobs.json` keys are now a pure function of the posting** - `/scrape` Step 4 described
+  the key as prose (`"<url_or_company_title_key>"`) and nothing said how to derive it, so each
+  run slugified in its own way. Two failures followed, both observed in a live state file. Keys
+  carried characters that break the path they later become: `/apply` and `/outcome` derive an
+  archive folder from the same company+role pair, which is why `documents/README.md` has a
+  subfolder rule, and keys like `deloitte_junior-cybersecurity-analyst-(ot/iot)` and
+  `neverhack-estonia_penetration-tester-/-red-teamer` violate it. And the same posting was
+  stored twice when two runs truncated one title at different points
+  (`deloitte_cyber-intelligence-center-security-analy` and
+  `...-security-analyst-at` are one job, one URL, two entries) - which defeats the dedup the
+  file exists for. `tools/job_key.py` now owns the derivation: the slug is normalised, and
+  truncation is length-capped *and* disambiguated by a hash of the full slug, so a long title
+  always produces the same key and two long titles sharing a prefix cannot collide. Step 4
+  calls the helper instead of describing it. `--audit` reports non-conforming entries in an
+  existing state file and deliberately never rewrites them: stored keys are matched against
+  `job_search_tracker.csv` by company+role elsewhere, so a silent rewrite would break the link
+  between a stored job and its application record.
+
 ## [1.7.1] - 2026-09-06
 
 ### Added
