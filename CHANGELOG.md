@@ -69,6 +69,9 @@ per-file diff commands.
   existing state file and deliberately never rewrites them: stored keys are matched against
   `job_search_tracker.csv` by company+role elsewhere, so a silent rewrite would break the link
   between a stored job and its application record.
+  Existing state files need no migration: Step 2's candidate filter matches a posting to a stored
+  entry by URL regardless of that entry's key, so a workspace whose entries predate the helper does
+  not see its still-live postings re-presented as new.
 ## [1.7.1] - 2026-09-06
 
 ### Added
